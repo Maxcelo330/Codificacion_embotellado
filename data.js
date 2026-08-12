@@ -1,82 +1,217 @@
-/* ═══════════════════════════════════════════════════════════════════
-   CARBONATACIÓN & BRIX · Base de datos de especificaciones
-   Fuente: LP-AC-E-01.11 Rev. 54 (14/04/2026) — Especificaciones de Línea
-   lei = Límite inferior · obj = Objetivo · les = Límite superior
-   ═══════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════
+   CODIFICADO · Verificación de fecha de vencimiento
+   Calidad Embotellado · Embol S.A. · Planta La Paz
+
+   Fuente: LP-AC-E-01.10 «Estándar de Codificación de Productos Embotellados
+   en La Paz», Revisión N.° 26 (28/01/2026).
+
+   FORMATO DEL CÓDIGO EN LA BOTELLA
+   ─────────────────────────────────
+       V24SEP26 LP4      línea 1 · vencimiento (mes en LETRAS) + planta y línea
+       L260626 12:00     línea 2 · lote (mes en NÚMEROS) + hora de embotellado
+       PET-PCR 30%       línea 3 · solo si el envase es PET no retornable
+
+   Ojo con la diferencia entre las dos primeras líneas: el vencimiento lleva el
+   mes en tres letras (ENE a DIC) y el lote lo lleva en dos dígitos (01 a 12).
+   Es el error de codificación más fácil de pasar por alto.
+   ═══════════════════════════════════════════════════════════════════════════ */
 'use strict';
 
-const DB = [
-{cat:"COCA-COLA",prod:"Coca-Cola",brix:{label:"° Brix",lei:10.22,obj:10.37,les:10.52},
- co2:[{pack:"PET (Todos)",lei:3.85,obj:4.10,les:4.35},{pack:"REF PET (2000)",lei:3.70,obj:3.95,les:4.20},{pack:"Vidrio (Todos)",lei:3.60,obj:3.85,les:4.10}],
- otros:[{n:"Concentración",lei:95.00,obj:100.00,les:105.00}]},
-{cat:"COCA-COLA",prod:"Coca-Cola Sin Azúcar",brix:{label:"° Brix",lei:0.09,obj:0.24,les:0.39},
- co2:[{pack:"PET (Todos)",lei:3.70,obj:3.95,les:4.20},{pack:"REF PET (Todos)",lei:3.75,obj:4.00,les:4.25},{pack:"Vidrio (Todos)",lei:3.45,obj:3.70,les:3.95}],otros:[]},
-{cat:"COCA-COLA",prod:"Coca-Cola Mid Cal (Einstein)",brix:{label:"° Brix",lei:7.24,obj:7.39,les:7.54},
- co2:[{pack:"PET (Todos)",lei:3.85,obj:4.10,les:4.35}],otros:[]},
-{cat:"SPRITE",prod:"Sprite Full Sugar",brix:{label:"° Brix",lei:9.86,obj:10.01,les:10.16},
- co2:[{pack:"PET (Todos)",lei:3.90,obj:4.15,les:4.40},{pack:"REF PET (2000)",lei:3.75,obj:4.00,les:4.25},{pack:"Vidrio (Todos)",lei:3.65,obj:3.90,les:4.15}],otros:[]},
-{cat:"FANTA",prod:"Fanta Naranja",brix:{label:"° Brix (Mid Cal)",lei:6.90,obj:7.05,les:7.20},
- co2:[{pack:"PET (Todos)",lei:2.60,obj:2.85,les:3.10},{pack:"REF PET (2000)",lei:2.45,obj:2.70,les:2.95},{pack:"Vidrio (Todos)",lei:2.35,obj:2.60,les:2.85}],otros:[]},
-{cat:"FANTA",prod:"Fanta Naranja Mandarina",brix:{label:"° Brix (Reformulado)",lei:6.97,obj:7.12,les:7.27},
- co2:[{pack:"PET (Todos)",lei:2.10,obj:2.35,les:2.60},{pack:"REF PET (2000)",lei:1.95,obj:2.20,les:2.45},{pack:"Vidrio (Todos)",lei:1.85,obj:2.10,les:2.35}],otros:[]},
-{cat:"FANTA",prod:"Fanta Zero",brix:{label:"° Brix (Reformulado)",lei:0.33,obj:0.48,les:0.63},
- co2:[{pack:"PET (Todos)",lei:2.75,obj:3.00,les:3.25}],
- otros:[{n:"Acidez",lei:95.00,obj:100.00,les:105.00},{n:"Acidez como Ac. Cítrico",lei:0.245,obj:0.258,les:0.271}]},
-{cat:"FANTA",prod:"Fanta Papaya",brix:{label:"° Brix (Reformulado)",lei:6.76,obj:6.91,les:7.06},
- co2:[{pack:"PET (Todos)",lei:3.60,obj:3.85,les:4.10},{pack:"REF PET (2000)",lei:3.45,obj:3.70,les:3.95},{pack:"Vidrio (Todos)",lei:3.35,obj:3.60,les:3.85}],otros:[]},
-{cat:"FANTA",prod:"Fanta Guaraná",brix:{label:"° Brix (Reformulado)",lei:6.83,obj:6.98,les:7.13},
- co2:[{pack:"PET (Todos)",lei:3.20,obj:3.45,les:3.70},{pack:"REF PET (2000)",lei:3.05,obj:3.30,les:3.55},{pack:"Vidrio (Todos)",lei:2.95,obj:3.20,les:3.45}],otros:[]},
-{cat:"FANTA",prod:"Fanta Limón",brix:{label:"° Brix (Reformulado)",lei:6.85,obj:7.00,les:7.15},
- co2:[{pack:"PET (Todos)",lei:2.60,obj:2.85,les:3.10},{pack:"RPET (Todos)",lei:2.45,obj:2.70,les:2.95}],otros:[]},
-{cat:"SIMBA",prod:"Simba Durazno",brix:{label:"° Brix (Reformulado)",lei:6.90,obj:7.05,les:7.20},
- co2:[{pack:"PET (Todos)",lei:2.85,obj:3.10,les:3.35},{pack:"Vidrio (Todos)",lei:2.60,obj:2.85,les:3.10}],otros:[]},
-{cat:"SIMBA",prod:"Simba Manzana",brix:{label:"° Brix (Reformulado)",lei:6.89,obj:7.04,les:7.19},
- co2:[{pack:"PET (Todos)",lei:2.30,obj:2.55,les:2.80},{pack:"Vidrio (Todos)",lei:2.05,obj:2.30,les:2.55}],otros:[]},
-{cat:"SIMBA",prod:"Simba Pomelo",brix:{label:"° Brix (Reformulado)",lei:7.13,obj:7.28,les:7.43},
- co2:[{pack:"PET (Todos)",lei:3.10,obj:3.35,les:3.60},{pack:"Vidrio (Todos)",lei:2.85,obj:3.10,les:3.35}],otros:[]},
-{cat:"SIMBA",prod:"Simba Piña",brix:{label:"° Brix (Reformulado)",lei:6.95,obj:7.10,les:7.25},
- co2:[{pack:"PET (Todos)",lei:2.80,obj:3.05,les:3.30},{pack:"Vidrio (Todos)",lei:2.55,obj:2.80,les:3.05}],otros:[]},
-{cat:"SCHWEPPES",prod:"Agua Tónica 990 ml",brix:{label:"° Brix",lei:8.85,obj:9.00,les:9.15},
- co2:[{pack:"PET (Todos)",lei:3.90,obj:4.15,les:4.40}],otros:[]},
-{cat:"SCHWEPPES",prod:"Ginger Ale 990 ml",brix:{label:"° Brix",lei:4.36,obj:4.51,les:4.66},
- co2:[{pack:"PET (Todos)",lei:3.90,obj:4.15,les:4.40}],otros:[]},
-{cat:"VITAL",prod:"Vital Sin Gas",brix:null,co2:[],
- otros:[{n:"Ozono Tanque",lei:0.30,obj:null,les:null},{n:"Ozono Botella",lei:0.10,obj:0.25,les:0.40},{n:"pH Bebida",lei:5.50,obj:7.50,les:8.50}]},
-{cat:"VITAL",prod:"Vital Con Gas",brix:null,
- co2:[{pack:"PET",lei:3.90,obj:4.15,les:4.40}],
- otros:[{n:"pH",lei:6.50,obj:null,les:8.50},{n:"Turbidez NTU",lei:null,obj:null,les:0.30},{n:"TDS ppm",lei:15.00,obj:null,les:50.00}]},
-{cat:"POWERADE",prod:"Powerade Multifruta",brix:{label:"° Brix",lei:6.22,obj:6.37,les:6.52},co2:[],
- otros:[{n:"Nitrógeno [psi]",lei:4.00,obj:6.00,les:8.00}]},
-{cat:"POWERADE",prod:"Powerade Mora Azul",brix:{label:"° Brix",lei:6.28,obj:6.43,les:6.58},co2:[],
- otros:[{n:"Nitrógeno [psi]",lei:4.00,obj:6.00,les:8.00}]},
-{cat:"POWERADE",prod:"Powerade Green Apple Sour",brix:{label:"° Brix",lei:4.17,obj:4.32,les:4.47},co2:[],
- otros:[{n:"Nitrógeno [psi]",lei:4.00,obj:6.00,les:8.00}]},
-{cat:"POWERADE",prod:"Powerade Citrus Passionfruit",brix:{label:"° Brix",lei:4.09,obj:4.24,les:4.39},co2:[],
- otros:[{n:"Nitrógeno [psi]",lei:4.00,obj:6.00,les:8.00}]},
-{cat:"POWERADE",prod:"Powerade Attack",brix:{label:"° Brix",lei:4.49,obj:4.64,les:4.79},co2:[],
- otros:[{n:"Nitrógeno [psi]",lei:4.00,obj:6.00,les:8.00}]},
-{cat:"POWERADE",prod:"Powerade Counterattack",brix:{label:"° Brix",lei:4.43,obj:4.58,les:4.73},co2:[],
- otros:[{n:"Nitrógeno [psi]",lei:4.00,obj:6.00,les:8.00}]},
-{cat:"AQUARIUS",prod:"Aquarius Manzana",brix:{label:"° Brix (Reformulado)",lei:7.52,obj:7.67,les:7.82},co2:[],
- otros:[{n:"Presión N₂ ≥ Litro [psi]",lei:6.00,obj:8.00,les:10.00},{n:"Presión N₂ < Litro [psi]",lei:4.00,obj:6.00,les:8.00}]},
-{cat:"AQUARIUS",prod:"Aquarius Pera",brix:{label:"° Brix (Reformulado)",lei:7.57,obj:7.72,les:7.87},co2:[],
- otros:[{n:"Presión N₂ ≥ Litro [psi]",lei:6.00,obj:8.00,les:10.00},{n:"Presión N₂ < Litro [psi]",lei:4.00,obj:6.00,les:8.00}]},
-{cat:"AQUARIUS",prod:"Aquarius Pomelo",brix:{label:"° Brix (Reformulado)",lei:7.83,obj:7.98,les:8.13},co2:[],
- otros:[{n:"Presión N₂ ≥ Litro [psi]",lei:6.00,obj:8.00,les:10.00},{n:"Presión N₂ < Litro [psi]",lei:4.00,obj:6.00,les:8.00}]},
-{cat:"DEL VALLE",prod:"Del Valle Fresh Citrus",brix:{label:"° Brix",lei:4.98,obj:5.13,les:5.28},co2:[],
- otros:[{n:"Acidez como Ac. Cítrico",lei:0.305,obj:0.321,les:0.337},{n:"Presión N₂ ≥ Litro [psi]",lei:6.00,obj:8.00,les:10.00},{n:"Presión N₂ < Litro [psi]",lei:4.00,obj:6.00,les:8.00}]},
-{cat:"DEL VALLE",prod:"Del Valle Manzana",brix:{label:"° Brix",lei:6.75,obj:6.90,les:7.05},co2:[],
- otros:[{n:"Acidez como Ac. Cítrico",lei:0.18,obj:0.19,les:0.19},{n:"Presión N₂ ≥ Litro [psi]",lei:6.00,obj:8.00,les:10.00},{n:"Presión N₂ < Litro [psi]",lei:4.00,obj:6.00,les:8.00}]},
-{cat:"DEL VALLE",prod:"Del Valle Durazno",brix:{label:"° Brix",lei:4.75,obj:4.90,les:5.05},co2:[],
- otros:[{n:"Presión N₂ ≥ Litro [psi]",lei:6.00,obj:8.00,les:10.00},{n:"Presión N₂ < Litro [psi]",lei:4.00,obj:6.00,les:8.00}]},
-{cat:"DEL VALLE",prod:"Del Valle Fresh Fruit Punch",brix:{label:"° Brix",lei:4.46,obj:4.61,les:4.76},co2:[],
- otros:[{n:"Acidez como Ac. Cítrico",lei:0.29,obj:0.31,les:0.32},{n:"Presión N₂ ≥ Litro [psi]",lei:6.00,obj:8.00,les:10.00},{n:"Presión N₂ < Litro [psi]",lei:4.00,obj:6.00,les:8.00}]},
-{cat:"DEL VALLE",prod:"Del Valle Fresh Tropical Punch",brix:{label:"° Brix",lei:4.892,obj:5.042,les:5.192},co2:[],
- otros:[{n:"Acidez como Ac. Cítrico",lei:0.357,obj:0.376,les:0.395},{n:"Presión N₂ ≥ Litro [psi]",lei:6.00,obj:8.00,les:10.00},{n:"Presión N₂ < Litro [psi]",lei:4.00,obj:6.00,les:8.00}]}
+/* Planta y líneas de embotellado de La Paz */
+const PLANTA = 'LP';
+const LINEAS = ['2', '3', '4', '5'];
+
+/* Meses en la línea de vencimiento */
+const MESES = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+
+/* ─────────────────────────── ENVASES ───────────────────────────
+   soloPCR: la tercera línea PET-PCR únicamente se imprime en envases de
+   PET no retornable, según la norma.                                        */
+const ENVASES = [
+  { id: 'petnr',     nombre: 'PET no retornable',  pcr: true  },
+  { id: 'refpet',    nombre: 'PET retornable',     pcr: false },
+  { id: 'vidrio',    nombre: 'Vidrio retornable',  pcr: false },
+  { id: 'lata',      nombre: 'Lata',               pcr: false },
+  { id: 'tetrapack', nombre: 'Tetrapack',          pcr: false },
+  { id: 'bib',       nombre: 'Bag in Box',         pcr: false }
 ];
 
-/* Correcciones por defecto del equipo (planilla de referencia) */
-const CORR_DEF = { p: '0,06', t: '0,08' };
+/* Tamaños que se usan con más frecuencia; el analista puede escribir otro */
+const TAMANOS = [250, 300, 355, 500, 600, 750, 990, 1000, 1500, 2000, 2500, 3000];
 
-/* Intervalo del análisis sensorial [horas] */
-const SENSORIAL_INTERVALO = 4;
+/* ─────────────────────────── PRODUCTOS ───────────────────────────
+   Nombre completo tal como figura en la hoja ABREVIATURAS del estándar.
+   El código corto se guarda solo como referencia; en pantalla siempre se
+   muestra el nombre completo.
+
+   grupo → determina qué regla de vida útil se aplica.                       */
+const PRODUCTOS = [
+  /* ── Carbonatados regulares · sin aspartame ── */
+  { nombre: 'Coca-Cola',                      codigo: 'CC',     cat: 'Carbonatados regulares',      grupo: 'carb_sin_aspartame' },
+  { nombre: 'Sprite',                         codigo: 'SP',     cat: 'Carbonatados regulares',      grupo: 'carb_sin_aspartame' },
+  { nombre: 'Vital con gas',                  codigo: 'VG',     cat: 'Carbonatados regulares',      grupo: 'carb_sin_aspartame' },
+  { nombre: 'Ginger Ale Canada Dry',          codigo: 'GA',     cat: 'Carbonatados regulares',      grupo: 'ginger_tonica' },
+  { nombre: 'Schweppes Tónica',               codigo: 'ST',     cat: 'Carbonatados regulares',      grupo: 'ginger_tonica' },
+
+  /* ── Carbonatados sin azúcar y zero · con aspartame, no blend ── */
+  { nombre: 'Coca-Cola Sin Azúcar',           codigo: 'CCSA',   cat: 'Carbonatados sin azúcar / zero', grupo: 'carb_aspartame_noblend' },
+  { nombre: 'Coca-Cola Zero',                 codigo: 'CCZ',    cat: 'Carbonatados sin azúcar / zero', grupo: 'carb_aspartame_noblend' },
+  { nombre: 'Fanta Naranja Sin Azúcar',       codigo: 'FNSA',   cat: 'Carbonatados sin azúcar / zero', grupo: 'carb_aspartame_noblend' },
+  { nombre: 'Sprite Sin Azúcar',              codigo: 'SPSA',   cat: 'Carbonatados sin azúcar / zero', grupo: 'carb_aspartame_noblend' },
+  { nombre: 'Coca-Cola Ultimate',             codigo: 'CCU',    cat: 'Carbonatados sin azúcar / zero', grupo: 'carb_aspartame_noblend' },
+
+  /* ── Carbonatados blend · nuevas formulaciones ── */
+  { nombre: 'Coca-Cola Menos Calorías',       codigo: 'CCMC',   cat: 'Carbonatados blend',          grupo: 'carb_aspartame_blend' },
+  { nombre: 'Fanta Naranja',                  codigo: 'FN',     cat: 'Carbonatados blend',          grupo: 'carb_aspartame_blend', retornableLargo: true },
+  { nombre: 'Fanta Naranja-Mandarina',        codigo: 'FNM',    cat: 'Carbonatados blend',          grupo: 'carb_aspartame_blend' },
+  { nombre: 'Fanta Papaya',                   codigo: 'FPY',    cat: 'Carbonatados blend',          grupo: 'carb_aspartame_blend' },
+  { nombre: 'Fanta Guaraná',                  codigo: 'FG',     cat: 'Carbonatados blend',          grupo: 'carb_aspartame_blend' },
+  { nombre: 'Fanta Limón',                    codigo: 'FL',     cat: 'Carbonatados blend',          grupo: 'carb_aspartame_blend' },
+  { nombre: 'Fanta Misterio',                 codigo: 'FM',     cat: 'Carbonatados blend',          grupo: 'carb_aspartame_blend' },
+  { nombre: 'Simba Manzana',                  codigo: 'SM',     cat: 'Carbonatados blend',          grupo: 'carb_aspartame_blend' },
+  { nombre: 'Simba Durazno',                  codigo: 'SD',     cat: 'Carbonatados blend',          grupo: 'carb_aspartame_blend' },
+  { nombre: 'Simba Piña',                     codigo: 'SPI',    cat: 'Carbonatados blend',          grupo: 'carb_aspartame_blend' },
+  { nombre: 'Simba Pomelo',                   codigo: 'SPM',    cat: 'Carbonatados blend',          grupo: 'carb_aspartame_blend' },
+  { nombre: 'Schweppes Ginger Ale',           codigo: 'SGA',    cat: 'Carbonatados blend',          grupo: 'ginger_tonica' },
+
+  /* ── Aguas ── */
+  { nombre: 'Vital sin gas',                  codigo: 'VSG',    cat: 'Aguas',                       grupo: 'agua_sin_gas' },
+
+  /* ── Energizantes ── */
+  { nombre: 'Fury',                           codigo: 'FY',     cat: 'Energizantes',                grupo: 'fury' },
+  { nombre: 'Monster Energy',                 codigo: 'ME',     cat: 'Energizantes',                grupo: 'monster' },
+
+  /* ── Isotónicos y aguas saborizadas ── */
+  { nombre: 'Powerade Ion-4 Mora Azul',       codigo: 'PW-MA',  cat: 'Isotónicos / aguas saborizadas', grupo: 'isotonico' },
+  { nombre: 'Powerade Ion-4 Multifrutas',     codigo: 'PW-MF',  cat: 'Isotónicos / aguas saborizadas', grupo: 'isotonico' },
+  { nombre: 'Powerade Ion-4 Manzana',         codigo: 'PW-MZ',  cat: 'Isotónicos / aguas saborizadas', grupo: 'isotonico' },
+  { nombre: 'Powerade Ion-4 Citrus Passion Fruit', codigo: 'PW-CP', cat: 'Isotónicos / aguas saborizadas', grupo: 'isotonico' },
+  { nombre: 'Powerade Ataque',                codigo: 'PW-AT',  cat: 'Isotónicos / aguas saborizadas', grupo: 'isotonico' },
+  { nombre: 'Powerade Contrataque',           codigo: 'PW-CAT', cat: 'Isotónicos / aguas saborizadas', grupo: 'isotonico' },
+  { nombre: 'Aquarius Manzana',               codigo: 'AQ-MZ',  cat: 'Isotónicos / aguas saborizadas', grupo: 'isotonico' },
+  { nombre: 'Aquarius Pera',                  codigo: 'AQ-PE',  cat: 'Isotónicos / aguas saborizadas', grupo: 'isotonico' },
+  { nombre: 'Aquarius Pomelo',                codigo: 'AQ-PO',  cat: 'Isotónicos / aguas saborizadas', grupo: 'isotonico' },
+
+  /* ── Jugos ── */
+  { nombre: 'Del Valle Fresh Naranja',        codigo: 'DV-FN',  cat: 'Jugos Del Valle',             grupo: 'jugo_del_valle' },
+  { nombre: 'Del Valle Fresh Fruit Punch',    codigo: 'DV-FFP', cat: 'Jugos Del Valle',             grupo: 'jugo_del_valle' },
+  { nombre: 'Del Valle Durazno',              codigo: 'DV-DU',  cat: 'Jugos Del Valle',             grupo: 'jugo_del_valle' },
+  { nombre: 'Del Valle Manzana',              codigo: 'DV-MZ',  cat: 'Jugos Del Valle',             grupo: 'jugo_del_valle' },
+  { nombre: 'Del Valle Tropical / Citrus',    codigo: 'DV-TR',  cat: 'Jugos Del Valle',             grupo: 'jugo_del_valle' },
+  { nombre: 'Jugos Ades producción local',    codigo: 'ADES-L', cat: 'Jugos Ades',                  grupo: 'ades_local' },
+  { nombre: 'Jugos Ades importado',           codigo: 'ADES-I', cat: 'Jugos Ades',                  grupo: 'ades_importado' },
+
+  /* ── Postmix ── */
+  { nombre: 'Jarabe Bag in Box postmix',      codigo: 'BIB',    cat: 'Postmix',                     grupo: 'bib_postmix' }
+];
+
+/* ═══════════════════ REGLAS DE VIDA ÚTIL Y PCR ═══════════════════
+   Se evalúan en orden y gana la primera que coincida, igual que se lee la
+   norma: primero los casos particulares y al final los generales.
+
+   dias  → estándar de edad, en días
+   pcr   → porcentaje de PET reciclado que debe imprimirse en la tercera línea
+           (null = el envase no lleva esa línea)
+   nota  → texto que se muestra al analista cuando la regla tiene alguna
+           particularidad o cuando el documento original no es claro          */
+const REGLAS = [
+
+  /* ── Casos particulares por producto ── */
+  { id: 'monster',
+    cuando: (p, e) => p.grupo === 'monster' && e === 'lata',
+    dias: 730, pcr: null },
+
+  { id: 'agua_chica',
+    cuando: (p, e, ml) => p.grupo === 'agua_sin_gas' && e === 'petnr' && ml <= 750,
+    dias: 330, pcr: 100,
+    nota: 'Vital sin gas de 600 y 750 ml se embotella en PET 100 % reciclado.' },
+
+  { id: 'agua_grande',
+    cuando: (p, e, ml) => p.grupo === 'agua_sin_gas' && e === 'petnr' && ml > 750,
+    dias: 330, pcr: 30 },
+
+  { id: 'fury',
+    cuando: p => p.grupo === 'fury',
+    dias: 250, pcr: 30,
+    nota: 'PENDIENTE DE CONFIRMAR: la hoja de vencimientos indica 250 días y la tabla del estándar indica 180. Se está usando 250.' },
+
+  { id: 'ginger_tonica_990',
+    cuando: (p, e, ml) => p.grupo === 'ginger_tonica' && e === 'petnr' && ml === 990,
+    dias: 90, pcr: 30,
+    nota: 'Ginger Ale y Agua Tónica de 990 ml pasaron de 65 a 90 días en la revisión 24 del estándar.' },
+
+  { id: 'isotonico',
+    cuando: p => p.grupo === 'isotonico',
+    dias: 180, pcr: 30 },
+
+  { id: 'jugo_dv',
+    cuando: p => p.grupo === 'jugo_del_valle',
+    dias: 180, pcr: 30 },
+
+  { id: 'ades_local',
+    cuando: p => p.grupo === 'ades_local',
+    dias: 180, pcr: null },
+
+  { id: 'ades_importado',
+    cuando: p => p.grupo === 'ades_importado',
+    dias: 300, pcr: null },
+
+  { id: 'bib',
+    cuando: (p, e) => p.grupo === 'bib_postmix' || e === 'bib',
+    dias: 75, pcr: null },
+
+  /* ── Retornables ── */
+  { id: 'fanta_naranja_retornable',
+    cuando: (p, e) => p.retornableLargo && (e === 'vidrio' || e === 'refpet'),
+    dias: 180, pcr: null,
+    nota: 'Fanta Naranja en vidrio y PET retornable tiene 180 días, por encima de los 135 del resto de los blend.' },
+
+  { id: 'retornable_sin_aspartame',
+    cuando: (p, e) => p.grupo === 'carb_sin_aspartame' && (e === 'vidrio' || e === 'refpet'),
+    dias: 180, pcr: null },
+
+  { id: 'retornable_con_aspartame',
+    cuando: (p, e) => (p.grupo === 'carb_aspartame_noblend' || p.grupo === 'carb_aspartame_blend' || p.grupo === 'ginger_tonica')
+                      && (e === 'vidrio' || e === 'refpet'),
+    dias: 135, pcr: null },
+
+  /* ── Carbonatados en PET no retornable ── */
+  { id: 'carb_300',
+    cuando: (p, e, ml) => esCarbonatado(p) && e === 'petnr' && ml === 300,
+    dias: 50, pcr: 35,
+    nota: 'El formato de 300 ml usa PET 35 % reciclado y 50 días (revisión 26 del estándar).' },
+
+  { id: 'carb_preforma',
+    cuando: (p, e, ml, pref) => esCarbonatado(p) && e === 'petnr' && ml === 500 && pref,
+    dias: 60, pcr: 35,
+    nota: 'Con preforma Preforsa de 20,1 g el envase de 500 ml lleva PET 35 % reciclado.' },
+
+  { id: 'carb_menor_litro',
+    cuando: (p, e, ml) => esCarbonatado(p) && e === 'petnr' && ml < 1000,
+    dias: 60, pcr: 30 },
+
+  { id: 'carb_litro_o_mas',
+    cuando: (p, e, ml) => esCarbonatado(p) && e === 'petnr' && ml >= 1000,
+    dias: 90, pcr: 30 },
+
+  /* ── Envases sin regla propia ── */
+  { id: 'tetrapack',
+    cuando: (p, e) => e === 'tetrapack',
+    dias: 180, pcr: null }
+];
+
+function esCarbonatado(p) {
+  return ['carb_sin_aspartame', 'carb_aspartame_noblend', 'carb_aspartame_blend', 'ginger_tonica'].includes(p.grupo);
+}
+
+/**
+ * Devuelve la regla que corresponde al producto, envase y tamaño elegidos.
+ * Si ninguna coincide devuelve null, y la app avisa en vez de inventar un dato.
+ */
+function reglaDe(producto, envase, ml, preforma) {
+  if (!producto || !envase) return null;
+  for (const r of REGLAS) {
+    if (r.cuando(producto, envase, ml, !!preforma)) return r;
+  }
+  return null;
+}

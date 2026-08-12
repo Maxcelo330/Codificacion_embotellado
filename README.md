@@ -1,100 +1,125 @@
-# Carbonatación &amp; Brix
+# Codificado · Verificación de fecha de vencimiento
 
-Aplicación de línea para el control de carbonatación, °Brix y demás parámetros
-de producto terminado.
+Aplicación de línea para verificar que el código impreso en la botella sea el
+que corresponde.
 
-**Calidad Embotellado · Embol S.A.**
+**Calidad Embotellado · Embol S.A. · Planta La Paz**
 
 ---
 
 ## Qué hace
 
-**Medición.** Eliges el producto y el empaque, y la app muestra únicamente los
-parámetros que ese producto realmente mide. Para las gaseosas aparecen CO₂ y
-°Brix; para el agua sin gas, ozono y pH; para los isotónicos, °Brix y nitrógeno.
-Lo que no se mide no se muestra, así nadie llena una casilla que no corresponde.
+**Calcula el código que debe salir.** Eliges el producto, el envase, el tamaño y
+la fecha y hora de embotellado, y la app arma las tres líneas tal como deben
+quedar impresas, sobre fondo negro y en letra monoespaciada para que se comparen
+carácter por carácter:
 
-Ingresas presión y temperatura y la app calcula el volumen de CO₂ corregido con
-las mismas fórmulas de la planilla «Carbonatación – Brix Corregido 2026». El
-color te dice el resultado de inmediato: verde dentro de especificación, ámbar
-dentro pero al límite, rojo fuera.
+```
+V 24SEP26 LP4      vencimiento · mes en TRES LETRAS
+L 260626 12:00     lote · mes en DOS DÍGITOS
+PET-PCR 30%       solo si el envase es PET no retornable
+```
 
-**Producción.** Arrancas la producción con su orden y su tanque. La app te
-recuerda sacar las 2 botellas para sensorial —una se mide al momento y la otra a
-las 4 horas— y desde ahí lleva la cuenta regresiva, avisando con notificación y
-sonido cada vez que toca llevar una muestra nueva. Cuando hay cambio de tanque
-se registra el cambio, se reinicia el ciclo de 4 horas y todas las mediciones
-siguientes heredan la orden y el tanque nuevos.
+El estándar de edad sale de LP-AC-E-01.10: la app sabe que un carbonatado en PET
+de menos de un litro dura 60 días, que en 300 ml son 50 y el reciclado sube a
+35 %, que Vital de 600 ml lleva PET 100 % reciclado, y así con cada caso.
 
-**Registros.** Tabla horaria con todas las mediciones, con su orden y tanque.
-Gráficas de tendencia de CO₂ y °Brix con la franja de especificación y la línea
-de objetivo. Exportación a Excel, PDF e imagen para revisar con supervisión.
+**Compara con la botella.** Se toma una foto del código real y queda al lado del
+código esperado, para revisar los dos juntos en la misma pantalla.
 
-**Especificaciones.** Consulta de LEI, objetivo y LES de todos los productos,
-según LP-AC-E-01.11 Rev. 54.
+**Registra la verificación** con el analista, el turno y las observaciones. Si el
+código está mal, se marca qué falló, quién fue el electrónico que ajustó el
+equipo y a qué hora, y se puede tomar una segunda foto después del ajuste.
+
+**Exporta en PDF**, una ficha por verificación con el código y las fotos. Es el
+formato pensado para revisar con supervisión, porque se entiende de un vistazo.
+También exporta la planilla en Excel para quien prefiera la tabla.
+
+---
+
+## El error más común
+
+Las dos primeras líneas llevan el mes de forma distinta y es lo más fácil de
+pasar por alto:
+
+| Línea | Mes | Ejemplo |
+|---|---|---|
+| Vencimiento | tres letras, de ENE a DIC | `V 24**SEP**26` |
+| Lote | dos dígitos, de 01 a 12 | `L 26**06**26` |
+
+La app siempre las muestra ya resueltas, así que basta con comparar.
 
 ---
 
 ## Instalarla en el celular
 
-La app se instala desde el navegador, no desde una tienda.
+**Android (Chrome).** Abre la dirección, toca el menú de tres puntos y elige
+*Instalar aplicación*.
 
-**Android (Chrome).** Abre la dirección de la app, toca el menú de tres puntos y
-elige *Instalar aplicación* o *Agregar a pantalla principal*.
+**iPhone (Safari).** Abre la dirección, toca compartir y elige *Agregar a
+inicio*. Tiene que ser Safari; desde Chrome no aparece la opción.
 
-**iPhone (Safari).** Abre la dirección, toca el botón de compartir y elige
-*Agregar a inicio*. En iPhone tiene que ser Safari; desde Chrome no aparece la
-opción.
-
-Una vez instalada funciona sin internet. La primera vez sí necesita conexión,
-para guardar los archivos en el celular.
+Una vez instalada funciona sin internet, y sigue funcionando aunque la página de
+GitHub deje de existir: el celular guarda su propia copia. La primera vez sí
+necesita conexión.
 
 ---
 
-## Publicarla en GitHub Pages
+## Publicarla
 
-La app son **7 archivos sueltos, sin ninguna carpeta**. Los íconos y el logo van
-incrustados dentro de `index.html` y de `manifest.webmanifest`, así que no hay
-subcarpetas que subir y no se puede romper por ahí.
-
-1. Crea un repositorio nuevo.
-2. Entra a **Add file → Upload files** y arrastra estos 7 archivos:
+1. Crea un repositorio y sube estos 7 archivos a la raíz, **más la carpeta
+   `icons` completa**:
 
    ```
    index.html   app.js   data.js   styles.css
    sw.js        manifest.webmanifest        .nojekyll
+   icons/       (los 6 archivos PNG que están dentro)
    ```
 
-3. Confirma con **Commit changes**.
-4. Entra a **Settings → Pages**, en *Branch* elige `main` y la carpeta
-   `/ (root)`. Guarda.
-5. A los pocos minutos la app queda en
-   `https://<tu-usuario>.github.io/<nombre-del-repositorio>/`.
+2. En **Settings → Pages** elige la rama `main` y la carpeta `/ (root)`.
 
-**El archivo `.nojekyll` tiene que subirse sí o sí.** Empieza con punto, así que
-Windows lo tiene oculto: activa **Vista → Elementos ocultos** en el Explorador
-antes de arrastrar. Sin él, GitHub no publica bien la app.
+**La carpeta `icons` sí hay que subirla.** Android necesita los íconos como
+archivos de verdad; si se los da incrustados dentro del manifest, en vez de
+instalar la app crea un acceso directo con el logo de Chrome. Si al arrastrar
+la carpeta GitHub se la salta, entra a **Add file → Create new file**, escribe
+`icons/icon-192.png` y luego sube los archivos ahí.
 
-Si al arrastrar no aparecen todos los archivos, súbelos de a pocos: la subida por
-arrastre de GitHub a veces se salta archivos cuando son muchos de golpe.
+**El `.nojekyll` tiene que subirse.** Empieza con punto y Windows lo oculta:
+activa **Vista → Elementos ocultos** en el Explorador antes de arrastrar.
 
-**La carpeta `icons/` no hace falta subirla.** Solo sirve como respaldo de los
-íconos originales, por si algún día quieres regenerarlos o usarlos en un
-documento.
+Cuando cambies algo, sube el número de versión en la primera línea de `sw.js`
+(`codif-v2` → `codif-v3`), o los celulares seguirán con la copia vieja.
 
 ---
 
-## Actualizarla después
+## Dónde se guardan los datos
 
-Cuando cambies cualquier archivo, sube el número de versión en la primera línea
-de `sw.js`:
+En el celular de cada analista, no en un servidor. Las fotos también. Por eso la
+app avisa cuando hay verificaciones sin respaldar, y conviene exportar el PDF o
+el respaldo `.json` al cerrar turno.
 
-```js
-const VERSION = 'carbo-v6';   // súbelo a v7, v8, etc.
-```
+Si se limpian los datos del navegador o se desinstala la app, se pierde todo lo
+que no se haya exportado.
 
-Si no lo cambias, los celulares que ya tienen la app instalada seguirán usando
-la copia vieja que guardaron.
+---
+
+## Pendientes por confirmar
+
+Al armar la app aparecieron dos contradicciones dentro del propio documento
+fuente. Están resueltas con el criterio más probable, pero conviene confirmarlas:
+
+| Caso | Qué dice el documento | Qué usa la app |
+|---|---|---|
+| **Fury** | La hoja de vencimientos dice 250 días; la tabla del estándar dice 180 | 250 días |
+| **Ginger Ale y Agua Tónica 990 ml** | La tabla dice 65 días; la revisión 24 y la hoja de vencimientos dicen 90 | 90 días |
+
+Ambos se cambian en `data.js`, en la lista `REGLAS`, modificando el número que
+sigue a `dias:`.
+
+También quedó una regla especial para **Fanta Naranja** en vidrio y PET
+retornable, con 180 días en vez de los 135 del resto de los blend, porque el
+estándar la nombra aparte. Si eso ya no aplica, se borra la regla
+`fanta_naranja_retornable`.
 
 ---
 
@@ -102,32 +127,39 @@ la copia vieja que guardaron.
 
 | Archivo | Qué contiene |
 |---|---|
-| `index.html` | La pantalla de la app. Lleva incrustados el logo de la cabecera y los íconos del navegador |
-| `app.js` | Cálculos, registros, recordatorios, gráficas y exportación |
-| `data.js` | Especificaciones de todos los productos (LP-AC-E-01.11 Rev. 54) |
+| `index.html` | La pantalla de la app |
+| `app.js` | Generación del código, fotos, registros y exportación |
+| `data.js` | Productos, envases y reglas del estándar de edad |
 | `styles.css` | Diseño |
 | `sw.js` | Permite que funcione sin internet |
-| `manifest.webmanifest` | Datos de la app instalada: nombre, colores e íconos, incrustados dentro del propio archivo |
-| `.nojekyll` | Necesario para que GitHub Pages publique todo correctamente |
-| `icons/` | *No hace falta subirla.* Respaldo de los íconos originales. Se generan con el script de `CALIDAD-EMBOL/marca` |
+| `manifest.webmanifest` | Datos e íconos de la app instalada |
+| `.nojekyll` | Necesario para GitHub Pages |
+| `icons/` | Los íconos de la app. Se pueden reemplazar por otros con el mismo nombre |
+| `informacion/` | El documento original del estándar. No hace falta subirla |
 
 ---
 
-## Dónde se guardan los datos
+## Cambiar los íconos
 
-Todo queda guardado **en el celular de cada analista**, no en un servidor. Por
-eso conviene exportar el Excel al terminar el turno, o usar el botón de respaldo
-`.json` de la pestaña Registros. Si se desinstala la app o se borran los datos
-del navegador, los registros se pierden.
+Están en `icons/`, como archivos sueltos:
 
----
+| Archivo | Dónde se ve |
+|---|---|
+| `icon-192.png` | ícono de la app en Android |
+| `icon-512.png` | tiendas, ajustes y pantallas grandes |
+| `icon-maskable-512.png` | versión con margen para el recorte circular de Android |
+| `icon-180.png` | iPhone y iPad |
+| `favicon-64.png` | pestaña del navegador |
+| `logo-header.png` | logo de la cabecera dentro de la app, con fondo transparente |
 
-## Especificaciones
+Para cambiarlos basta reemplazar los archivos conservando el mismo nombre y
+tamaño. Se generan con `generar_iconos_sectores.py`, en la carpeta
+`CALIDAD-EMBOL/marca`.
 
-Las de `data.js` corresponden a **LP-AC-E-01.11, Revisión N.° 54 (14/04/2026)**.
-Cuando salga una revisión nueva hay que actualizar ese archivo y subir la
-versión en `sw.js`.
+Después de cambiarlos, sube la versión en `sw.js` o los celulares seguirán
+mostrando el ícono viejo.
 
 ---
 
 Desarrollado por Marcelo Herrera · Calidad Embotellado · Embol S.A.
+Basado en LP-AC-E-01.10, Revisión N.° 26 (28/01/2026).

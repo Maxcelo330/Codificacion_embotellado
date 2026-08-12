@@ -1,8 +1,8 @@
-/* Service Worker — Carbonatación & Brix · Calidad Embotellado Embol
+/* Service Worker — Codificado · Calidad Embotellado Embol
    Cache-first para los archivos propios (funciona sin internet).
    IMPORTANTE: sube el número de VERSION cada vez que modifiques la app. */
 
-const VERSION = 'carbo-v10';
+const VERSION = 'codif-v3';
 
 const CORE = [
   './',
@@ -22,11 +22,9 @@ const CORE = [
 /* Librerías externas para exportar. Si no se pueden guardar, la app igual
    funciona: usa formatos de respaldo (CSV e impresión). */
 const CDN = [
-  'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
   'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js',
-  'https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js',
-  'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap'
+  'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
+  'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@700;800&display=swap'
 ];
 
 /* ── Guarda los archivos del núcleo; se puede llamar las veces que haga falta ── */
@@ -44,7 +42,7 @@ async function guardarNucleo() {
 function paginaSinConexion() {
   const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Sin conexión · Carbonatación &amp; Brix</title>
+<title>Sin conexión · Codificado</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#F6F7F9;color:#1A1D23;

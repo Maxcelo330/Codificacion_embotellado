@@ -1,7 +1,7 @@
 {
-  "name": "Carbonatación & Brix · Calidad Embotellado",
-  "short_name": "Carbonatación",
-  "description": "Volúmenes de CO2, °Brix y demás parámetros de línea, con recordatorio de muestras a sensorial cada 4 horas, registro de órdenes y cambios de tanque, tabla horaria y gráficas. Calidad Embotellado · Embol S.A.",
+  "name": "Codificado · Calidad Embotellado",
+  "short_name": "Codificado",
+  "description": "Verificación de la fecha de vencimiento y del código impreso en la botella, con foto de comparación y registro por analista. Calidad Embotellado · Embol S.A.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
