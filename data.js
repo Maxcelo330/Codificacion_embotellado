@@ -78,7 +78,7 @@ const PRODUCTOS = [
   { nombre: 'Vital sin gas',                  codigo: 'VSG',    cat: 'Aguas',                       grupo: 'agua_sin_gas' },
 
   /* ── Energizantes ── */
-  { nombre: 'Fury',                           codigo: 'FY',     cat: 'Energizantes',                grupo: 'fury' },
+  { nombre: 'Furia',                           codigo: 'FY',     cat: 'Energizantes',                grupo: 'fury' },
   { nombre: 'Monster Energy',                 codigo: 'ME',     cat: 'Energizantes',                grupo: 'monster' },
 
   /* ── Isotónicos y aguas saborizadas ── */
